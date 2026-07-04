@@ -1,0 +1,84 @@
+# Environment files
+.env
+.env.local
+.env.production.local
+.env.development.local
+.env.test.local
+
+# Backend
+backend/venv/
+backend/env/
+backend/__pycache__/
+backend/db.sqlite3
+backend/db.sqlite3-journal
+backend/*.pyc
+backend/.DS_Store
+backend/staticfiles/
+backend/media/
+backend/.coverage
+backend/htmlcov/
+
+# Frontend
+frontend/node_modules/
+frontend/build/
+frontend/.DS_Store
+frontend/.env.production
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+
+# IDE / Editor configs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.sublime-project
+.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Docker
+docker-compose.override.yml
+
+# Logs
+*.log
+*.logs
+celery-beat-schedule
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+
+# Testing
+.pytest_cache/
+.tox/
+coverage.xml
+
+# Distribution / Build
+dist/
+build/
+*.egg-info/
+
+# Backup files
+*.backup
+*.bak
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual environments
+venv/
+env/
+
+# Database files (optional: Django default SQLite, safe to ignore)
+*.sqlite3
+
+# Node / React frontend
+node_modules/
+*.tsbuildinfo
