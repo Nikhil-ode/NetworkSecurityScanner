@@ -30,25 +30,8 @@ RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout cert.key -out cert.pem \
     -subj "/C=IN/CN=localhost"
 
-# Configure nginx
-RUN cat > /etc/nginx/conf.d/default.conf << 'EOF'
-server {
-    listen 80;
-    server_name localhost;
-    
-    location / {
-        root /app/static;
-        index index.html;
-        try_files $uri $uri/ /index.html;
-    }
-    
-    location /api/ {
-        proxy_pass http://127.0.0.1:8000;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-    }
-}
-EOF
+# Copy nginx config
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port 80
 EXPOSE 80
