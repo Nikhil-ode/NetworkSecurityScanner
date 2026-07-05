@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS backend
+FROM python:3.12-slim
 
 WORKDIR /app
 
@@ -6,6 +6,7 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y --no-install-recommends \
     gcc \
     openssl \
+    nginx \
     && rm -rf /var/lib/apt/lists/*
 
 # Python deps
@@ -15,33 +16,42 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend code
 COPY . .
 
+# Build and copy frontend
+RUN mkdir -p /app/static && \
+    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
+    apt-get install -y nodejs && \
+    cd NetworkSecurityScanner/frontend && \
+    npm install && \
+    npm run build && \
+    cp -r build/* /app/static/
+
 # Generate SSL cert
 RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
     -keyout cert.key -out cert.pem \
     -subj "/C=IN/CN=localhost"
 
-# Build frontend
-FROM node:20-alpine AS frontend
-WORKDIR /app
-COPY NetworkSecurityScanner/frontend/package.json ./
-RUN npm install
-COPY NetworkSecurityScanner/frontend/ .
-RUN npm run build
-
-# Final image: nginx serving frontend + proxy to backend
-FROM nginx:alpine
-
-# Copy frontend build
-COPY --from=frontend /app/build /usr/share/nginx/html
-
-# Copy backend
-COPY --from=backend /app /app
-
-# Copy nginx config
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Configure nginx
+RUN cat > /etc/nginx/conf.d/default.conf << 'EOF'
+server {
+    listen 80;
+    server_name localhost;
+    
+    location / {
+        root /app/static;
+        index index.html;
+        try_files $uri $uri/ /index.html;
+    }
+    
+    location /api/ {
+        proxy_pass http://127.0.0.1:8000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+    }
+}
+EOF
 
 # Expose port 80
 EXPOSE 80
 
-# Start backend + nginx
-CMD sh -c "python -m daphne -e tcp:8000:interface=0.0.0.0 config.asgi:application & nginx -g 'daemon off;'"
+# Start nginx + daphne
+CMD service nginx start && python -m daphne -e tcp:8000:interface=0.0.0.0 config.asgi:application
