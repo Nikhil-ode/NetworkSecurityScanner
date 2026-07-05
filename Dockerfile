@@ -44,4 +44,4 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 EXPOSE 80
 
 # Start backend + nginx
-CMD python -m daphne -e tcp:8000 config.asgi:application & nginx -g "daemon off;"
+CMD sh -c "python -m daphne -e tcp:8000:interface=0.0.0.0 config.asgi:application & nginx -g 'daemon off;'"
