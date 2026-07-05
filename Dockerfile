@@ -36,5 +36,5 @@ COPY nginx.conf /etc/nginx/conf.d/default.conf
 # Expose port 80
 EXPOSE 80
 
-# Start nginx + daphne
-CMD service nginx start && python -m daphne -e tcp:8000:interface=0.0.0.0 config.asgi:application
+# Start daphne in background, then nginx in foreground
+CMD sh -c "python -m daphne -e tcp:8000:interface=0.0.0.0 config.asgi:application & nginx -g 'daemon off;'"
