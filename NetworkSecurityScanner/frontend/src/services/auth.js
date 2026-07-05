@@ -14,12 +14,12 @@ export const authService = {
   },
 
   getMe: async () => {
-    const response = await apiClient.get('/api/auth/users/me/');
+    const response = await apiClient.get('/auth/users/me/');
     return response.data;
   },
 
   register: async (username, email, password) => {
-    const response = await apiClient.post('/api/auth/users/', {
+    const response = await apiClient.post('/auth/users/', {
       username,
       email,
       password,
@@ -28,7 +28,7 @@ export const authService = {
   },
 
   updateProfile: async (data) => {
-    const response = await apiClient.put('/api/auth/profiles/', data);
+    const response = await apiClient.put('/auth/profiles/', data);
     return response.data;
   },
 };
