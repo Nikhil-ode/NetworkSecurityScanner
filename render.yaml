@@ -28,7 +28,7 @@ services:
       - key: SUPABASE_URL
         value: "https://lqnzzpfypipkawujfprq.supabase.co"
       - key: SUPABASE_PUBLISHABLE_KEY
-        value: "sb_publishable_rvZIJ78ikGxnh5Lx6nSdWQ_oUXrHxfU"
+        value: "replace_with_your_publishable_key"
       - key: SUPABASE_SECRET_KEY
         sync: false
       - key: DB_NAME
@@ -36,7 +36,7 @@ services:
       - key: DB_USER
         value: "postgres.lqnzzpfypipkawujfprq"
       - key: DB_PASSWORD
-        value: "Nikhilrajput11"
+        value: "replace_with_your_db_password"
       - key: DB_HOST
         value: "aws-1-ap-northeast-1.pooler.supabase.com"
       - key: DB_PORT
