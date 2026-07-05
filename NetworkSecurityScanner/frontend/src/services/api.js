@@ -67,7 +67,7 @@ apiClient.interceptors.response.use(
 // Utility function to check if API is available
 export const checkApiHealth = async () => {
   try {
-    const response = await apiClient.get('/api/auth/users/me/');
+    const response = await apiClient.get('/auth/users/me/');
     return response.status === 200 || response.status === 401;
   } catch (error) {
     console.error('API health check failed:', error);
