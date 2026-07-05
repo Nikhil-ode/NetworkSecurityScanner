@@ -6,15 +6,12 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.http import HttpResponse
+from django.views.generic import TemplateView
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
     TokenVerifyView,
 )
-
-# 👇 Simple homepage view
-def home(request):
-    return HttpResponse("Welcome to Network Security Scanner!")
 
 urlpatterns = [
     # Admin panel
@@ -30,12 +27,13 @@ urlpatterns = [
     path('api/scans/', include('apps.scans.urls')),
     path('api/reports/', include('apps.reports.urls')),
     path('api/vulnerabilities/', include('apps.vulnerabilities.urls')),
-
-    # ✅ Root homepage
-    path('', home),
 ]
 
-# ✅ Static & Media files (only in DEBUG mode)
-if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+# ✅ Static & Media files
+urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+
+# ✅ Serve React frontend for all other routes (catch-all)
+urlpatterns += [
+    path('', TemplateView.as_view(template_name='index.html'), name='home'),
+]

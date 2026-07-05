@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || '/api';
+const API_BASE_URL = process.env.REACT_APP_API_URL || '';
 
 // Create axios instance
 const apiClient = axios.create({
@@ -67,7 +67,7 @@ apiClient.interceptors.response.use(
 // Utility function to check if API is available
 export const checkApiHealth = async () => {
   try {
-    const response = await apiClient.get('/auth/users/me/');
+    const response = await apiClient.get('/api/auth/users/me/');
     return response.status === 200 || response.status === 401;
   } catch (error) {
     console.error('API health check failed:', error);

@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: network-security-scanner
+    env: python
+    buildCommand: |
+      pip install -r requirements.txt
+      # Install Node.js and build frontend
+      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
+      apt-get install -y nodejs
+      cd NetworkSecurityScanner/frontend
+      npm install
+      npm run build
+      # Copy frontend build to Django static folder
+      mkdir -p ../../staticfiles
+      cp -r build/* ../../staticfiles/
+    startCommand: python manage.py collectstatic --noinput && python -m daphne -b 0.0.0.0 -p $PORT config.asgi:application
+    envVars:
+      - key: USE_SQLITE
+        value: "False"
+      - key: DEBUG
+        value: "False"
+      - key: ALLOWED_HOSTS
+        value: "*"
+      - key: CORS_ALLOWED_ORIGINS
+        value: "*"
+      - key: SECRET_KEY
+        value: render-secret-key-change-in-production
+      - key: SUPABASE_URL
+        value: "https://lqnzzpfypipkawujfprq.supabase.co"
+      - key: SUPABASE_PUBLISHABLE_KEY
+        value: "sb_publishable_rvZIJ78ikGxnh5Lx6nSdWQ_oUXrHxfU"
+      - key: SUPABASE_SECRET_KEY
+        sync: false
+      - key: DB_NAME
+        value: "postgres"
+      - key: DB_USER
+        value: "postgres.lqnzzpfypipkawujfprq"
+      - key: DB_PASSWORD
+        value: "Nikhilrajput11"
+      - key: DB_HOST
+        value: "aws-1-ap-northeast-1.pooler.supabase.com"
+      - key: DB_PORT
+        value: "6543"
