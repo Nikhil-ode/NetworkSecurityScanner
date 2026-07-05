@@ -1,13 +1,17 @@
-FROM python:3.12-slim
+FROM python:3.12-alpine
 
 WORKDIR /app
 
 # System deps
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN apk add --no-cache \
     gcc \
+    musl-dev \
+    linux-headers \
     openssl \
     nginx \
-    && rm -rf /var/lib/apt/lists/*
+    nodejs \
+    npm \
+    supervisor
 
 # Python deps
 COPY requirements.txt .
@@ -16,10 +20,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy backend code
 COPY . .
 
-# Build and copy frontend
+# Build frontend
 RUN mkdir -p /app/static && \
-    curl -fsSL https://deb.nodesource.com/setup_20.x | bash - && \
-    apt-get install -y nodejs && \
     cd NetworkSecurityScanner/frontend && \
     npm install && \
     npm run build && \
@@ -33,8 +35,11 @@ RUN openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
 # Copy nginx config
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Expose port 80
+# Supervisor config
+COPY supervisord.conf /etc/supervisord.conf
+
+RUN mkdir -p /var/log/supervisor
+
 EXPOSE 80
 
-# Start daphne in background, then nginx in foreground
-CMD sh -c "daphne -b 0.0.0.0 -p 8000 config.asgi:application & nginx -g 'daemon off;'"
+CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
