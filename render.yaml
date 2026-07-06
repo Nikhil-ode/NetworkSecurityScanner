@@ -2,18 +2,8 @@ services:
   - type: web
     name: network-security-scanner
     env: python
-    buildCommand: |
-      pip install -r requirements.txt
-      # Install Node.js and build frontend
-      curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
-      apt-get install -y nodejs
-      cd NetworkSecurityScanner/frontend
-      npm install
-      npm run build
-      # Copy frontend build to Django static folder
-      mkdir -p ../../staticfiles
-      cp -r build/* ../../staticfiles/
-    startCommand: python manage.py collectstatic --noinput && python -m daphne -b 0.0.0.0 -p $PORT config.asgi:application
+    buildCommand: pip install -r requirements.txt
+    startCommand: python manage.py collectstatic --noinput && python manage.py migrate --noinput && python create_su.py && python -m daphne -b 0.0.0.0 -p $PORT config.asgi:application
     envVars:
       - key: USE_SQLITE
         value: "False"
