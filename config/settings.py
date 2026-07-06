@@ -10,12 +10,6 @@ SECRET_KEY = config('SECRET_KEY', default='p$w2hc6au^a!m)_=$&9vscm(y#%m3h47o&#i7
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
 
-# Installed Apps
-# If your apps are in backend/apps/<appname>, use 'apps.users' style.
-# If your apps are directly in backend/<appname>, use 'users' style.
-# Pick one of the two blocks below and keep only the matching one.
-
-# ---- Option A: apps are directly under backend/ (common) ----
 INSTALLED_APPS = [
     'daphne',
     'django.contrib.admin',
@@ -35,7 +29,6 @@ INSTALLED_APPS = [
     'apps.vulnerabilities',
 ]
 
-# Middleware
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -53,7 +46,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates', BASE_DIR / 'staticfiles'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -89,7 +82,6 @@ else:
             'PORT': config('DB_PORT', default='6543'),
             'OPTIONS': {
                 'sslmode': 'require',
-                'options': '-c pgsql.tenant_id=lqnzzpfypipkawujfprq',
             },
         }
     }
@@ -108,6 +100,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_DIRS = [BASE_DIR / 'static']
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 MEDIA_URL = '/media/'
@@ -156,25 +149,11 @@ SUPABASE_KEY = config('SUPABASE_PUBLISHABLE_KEY', default='')
 # -------------------------
 LOG_DIR = BASE_DIR / 'logs'
 try:
-    # try to create logs dir (safe on Windows)
     LOG_DIR.mkdir(parents=True, exist_ok=True)
 except Exception:
-    # fallback to project root if cannot create logs dir
     LOG_DIR = BASE_DIR
 
 LOG_FILE = LOG_DIR / 'app.log'
-try:
-    if not LOG_FILE.exists():
-        LOG_FILE.touch()
-except Exception:
-    # fallback to root-level file if touch fails
-    LOG_FILE = BASE_DIR / 'app.log'
-    try:
-        if not LOG_FILE.exists():
-            LOG_FILE.touch()
-    except Exception:
-        # last fallback: don't use file handler at all (use console only)
-        LOG_FILE = None
 
 LOG_HANDLERS = {
     'console': {
@@ -184,15 +163,18 @@ LOG_HANDLERS = {
     }
 }
 
-if LOG_FILE:
-    LOG_HANDLERS['file'] = {
-        'level': 'INFO',
-        'class': 'logging.handlers.RotatingFileHandler',
-        'filename': str(LOG_FILE),
-        'maxBytes': 1024 * 1024 * 15,
-        'backupCount': 10,
-        'formatter': 'verbose',
-    }
+if LOG_DIR:
+    try:
+        LOG_HANDLERS['file'] = {
+            'level': 'INFO',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': str(LOG_FILE),
+            'maxBytes': 1024 * 1024 * 15,
+            'backupCount': 10,
+            'formatter': 'verbose',
+        }
+    except Exception:
+        pass
 
 LOGGING = {
     'version': 1,

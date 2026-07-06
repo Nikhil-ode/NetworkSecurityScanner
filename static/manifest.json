@@ -1,0 +1,16 @@
+{
+  "name": "Network Security Scanner",
+  "short_name": "NSS",
+  "description": "A comprehensive network security scanner application",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "192x192",
+      "type": "image/x-icon"
+    }
+  ]
+}
