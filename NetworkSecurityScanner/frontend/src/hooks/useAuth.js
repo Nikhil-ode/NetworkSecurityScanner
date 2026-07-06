@@ -36,9 +36,11 @@ export const useAuth = () => {
       const token = data.access || data.token;
       if (!token) throw new Error('No token received');
 
-      const userName = data.user?.username || data.username || username;
       localStorage.setItem('authToken', token);
-      setUser({ username: userName });
+
+      // Fetch full user profile after login
+      const userData = await authService.getMe();
+      setUser(userData);
     } catch (err) {
       console.error('Login failed', err);
       setError(err.message || 'Login failed');
