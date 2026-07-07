@@ -326,3 +326,9 @@ Developed by Nikhil Rajput
 ---
 
 > Note: This project uses Supabase PostgreSQL as the primary database. SQLite support has been removed in favor of cloud database storage.
+
+## Usage
+
+```bash
+python3 main.py
+```

@@ -54,7 +54,7 @@ def run_scan_task(self, scan_id):
             scan.status = 'failed'
             scan.completed_at = datetime.now()
             scan.save()
-        except:
-            pass
+        except OSError:
+        pass
         # Retry the task
         raise self.retry(exc=e, countdown=60)
