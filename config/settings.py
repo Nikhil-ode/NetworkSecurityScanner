@@ -2,13 +2,24 @@ import os
 from pathlib import Path
 from datetime import timedelta
 from decouple import config
+from django.core.exceptions import ImproperlyConfigured
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # Security
-SECRET_KEY = config('SECRET_KEY', default='p$w2hc6au^a!m)_=$&9vscm(y#%m3h47o&#i7r1d#t-lh_b-_*')
-DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+DEBUG = config('DEBUG', default=False, cast=bool)
+
+# Require SECRET_KEY in production
+SECRET_KEY = config('SECRET_KEY', default=None)
+if not SECRET_KEY:
+    if DEBUG:
+        # Development fallback (explicitly obvious insecure value)
+        SECRET_KEY = 'insecure-development-secret-change-me'
+    else:
+        raise ImproperlyConfigured('The SECRET_KEY environment variable is not set.')
+
+# ALLOWED_HOSTS: comma-separated env var, empty -> []
+ALLOWED_HOSTS = [h.strip() for h in config('ALLOWED_HOSTS', default='').split(',') if h.strip()]
 
 INSTALLED_APPS = [
     'channels',
@@ -73,16 +84,18 @@ if USE_SQLITE:
         }
     }
 else:
+    # Do NOT put production credentials in source. Use environment variables.
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': config('DB_NAME', default='postgres'),
-            'USER': config('DB_USER', default='postgres.lqnzzpfypipkawujfprq'),
-            'PASSWORD': config('DB_PASSWORD', default='Nikhilrajput11'),
-            'HOST': config('DB_HOST', default='aws-1-ap-northeast-1.pooler.supabase.com'),
-            'PORT': config('DB_PORT', default='6543'),
+            'USER': config('DB_USER', default='postgres'),
+            'PASSWORD': config('DB_PASSWORD', default=''),
+            'HOST': config('DB_HOST', default='localhost'),
+            'PORT': config('DB_PORT', default='5432'),
             'OPTIONS': {
-                'sslmode': 'require',
+                # SSL optional; enable via env in production if needed
+                **({ 'sslmode': 'require' } if config('DB_SSLMODE', default='').lower() == 'require' else {}),
             },
         }
     }
@@ -132,13 +145,26 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
-CORS_ALLOW_ALL_ORIGINS = True
+# CORS: default to safe (no-all-origins). Set env var CORS_ALLOW_ALL_ORIGINS=true for dev if needed.
+CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
 
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels.layers.InMemoryChannelLayer",
-    },
-}
+# CHANNEL LAYERS: in-memory for local development, Redis for production
+if DEBUG:
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels.layers.InMemoryChannelLayer",
+        },
+    }
+else:
+    REDIS_URL = config('REDIS_URL', default='redis://localhost:6379/0')
+    CHANNEL_LAYERS = {
+        "default": {
+            "BACKEND": "channels_redis.core.RedisChannelLayer",
+            "CONFIG": {
+                "hosts": [REDIS_URL],
+            },
+        },
+    }
 
 CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default='redis://localhost:6379/0')
@@ -148,7 +174,8 @@ CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'UTC'
 
 SUPABASE_URL = config('SUPABASE_URL', default='')
-SUPABASE_KEY = config('SUPABASE_PUBLISHABLE_KEY', default='')
+# Prefer a server-side key name for backend use. This must be provided via environment in production.
+SUPABASE_KEY = config('SUPABASE_KEY', default='')
 
 # -------------------------
 # Logging: safe create + fallback
@@ -169,18 +196,19 @@ LOG_HANDLERS = {
     }
 }
 
-if LOG_DIR:
-    try:
-        LOG_HANDLERS['file'] = {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': str(LOG_FILE),
-            'maxBytes': 1024 * 1024 * 15,
-            'backupCount': 10,
-            'formatter': 'verbose',
-        }
-    except Exception:
-        pass
+# Only add a file handler if we can write to the log directory
+try:
+    LOG_HANDLERS['file'] = {
+        'level': 'INFO',
+        'class': 'logging.handlers.RotatingFileHandler',
+        'filename': str(LOG_FILE),
+        'maxBytes': 1024 * 1024 * 15,
+        'backupCount': 10,
+        'formatter': 'verbose',
+    }
+except Exception:
+    # If file handler setup fails, continue with console-only logging
+    pass
 
 LOGGING = {
     'version': 1,
