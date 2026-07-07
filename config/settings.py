@@ -32,9 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework',
     'rest_framework.authtoken',
-    'rest_framework_simplejwt',
     'corsheaders',
-    'django_celery_beat',
     'apps.users',
     'apps.scans',
     'apps.reports',
@@ -122,10 +120,10 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# REST + JWT
+# REST + Session Auth
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
     ),
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
@@ -138,15 +136,10 @@ REST_FRAMEWORK = {
     ],
 }
 
-SIMPLE_JWT = {
-    "ACCESS_TOKEN_LIFETIME": timedelta(days=1),
-    "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
-    "ROTATE_REFRESH_TOKENS": True,
-    "BLACKLIST_AFTER_ROTATION": True,
-}
+# Session Auth is used instead of JWT/Tokens
 
-# CORS: default to safe (no-all-origins). Set env var CORS_ALLOW_ALL_ORIGINS=true for dev if needed.
-CORS_ALLOW_ALL_ORIGINS = config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
+# CORS: allow all origins for deployed frontend
+CORS_ALLOW_ALL_ORIGINS = True
 
 # CHANNEL LAYERS: in-memory for local development, Redis for production
 if DEBUG:
