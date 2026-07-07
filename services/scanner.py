@@ -49,7 +49,9 @@ class NetworkScanner:
             }
 
         # Define port sets based on scan_type
-        if scan_type == 'quick':
+        if scan_type == 'all':
+            ports = list(range(1, 65536))
+        elif scan_type == 'quick':
             ports = [21, 22, 23, 25, 53, 80, 110, 143, 443, 445, 3389, 8080]
         elif scan_type == 'ports':
             ports = list(range(1, 1025))
