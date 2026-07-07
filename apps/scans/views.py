@@ -21,8 +21,15 @@ class ScanViewSet(viewsets.ModelViewSet):
         try:
             scan = serializer.save(user=self.request.user, status='pending')
             # Schedule the scan task
-            run_scan_task.delay(scan.id)
-            logger.info(f"Scan {scan.id} created and scheduled for user {self.request.user.username}")
+            try:
+                run_scan_task.delay(scan.id)
+                logger.info(f"Scan {scan.id} created and scheduled for user {self.request.user.username}")
+            except Exception as celery_error:
+                logger.warning(f"Celery not available, running scan synchronously: {celery_error}")
+                scan.status = 'in_progress'
+                scan.save()
+                run_scan_task(scan.id)
+                logger.info(f"Scan {scan.id} completed synchronously")
         except Exception as e:
             logger.error(f"Error creating scan: {str(e)}")
             raise
