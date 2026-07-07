@@ -26,22 +26,89 @@ apiClient.interceptors.request.use(
   }
 );
 
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
 // Response interceptor - Handle errors and token expiration
 apiClient.interceptors.response.use(
   (response) => {
     console.debug('API Response:', response.config.url, response.status);
     return response;
   },
-  (error) => {
+  async (error) => {
     console.error('API Error:', error.response?.status, error.response?.data);
 
-    // Handle 401 Unauthorized
-    if (error.response?.status === 401) {
-      console.warn('Unauthorized - Clearing auth token');
-      localStorage.removeItem('authToken');
-      // Redirect to login only if not already on login page
-      if (window.location.pathname !== '/login') {
-        window.location.href = '/login';
+    const originalRequest = error.config;
+
+    // Handle 401 Unauthorized - attempt token refresh
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(token => {
+          originalRequest.headers.Authorization = `Bearer ${token}`;
+          return apiClient(originalRequest);
+        }).catch(err => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      const refreshToken = localStorage.getItem('refreshToken');
+      
+      if (refreshToken) {
+        try {
+          // Refresh the access token
+          const response = await axios.post('/api/auth/jwt/refresh/', {
+            refresh: refreshToken
+          }, {
+            baseURL: API_BASE_URL,
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          });
+
+          const newAccessToken = response.data.access;
+          
+          if (newAccessToken) {
+            localStorage.setItem('authToken', newAccessToken);
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            processQueue(null, newAccessToken);
+            return apiClient(originalRequest);
+          }
+        } catch (refreshError) {
+          console.error('Token refresh failed:', refreshError);
+          processQueue(refreshError, null);
+          localStorage.removeItem('authToken');
+          localStorage.removeItem('refreshToken');
+          // Redirect to login only if not already on login page
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
+          return Promise.reject(refreshError);
+        } finally {
+          isRefreshing = false;
+        }
+      } else {
+        // No refresh token available
+        localStorage.removeItem('authToken');
+        if (window.location.pathname !== '/login') {
+          window.location.href = '/login';
+        }
+        return Promise.reject(error);
       }
     }
 

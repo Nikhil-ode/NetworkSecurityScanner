@@ -37,6 +37,7 @@ export const useAuth = () => {
       if (!token) throw new Error('No token received');
 
       localStorage.setItem('authToken', token);
+      localStorage.setItem('refreshToken', data.refresh);
 
       // Fetch full user profile after login
       const userData = await authService.getMe();
