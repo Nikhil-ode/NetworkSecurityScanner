@@ -132,11 +132,6 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
-CORS_ALLOWED_ORIGINS = [
-    'https://networksecurityscanner.onrender.com',
-    'https://www.networksecurityscanner.onrender.com',
-    'http://localhost:3000',
-]
 CORS_ALLOW_ALL_ORIGINS = True
 
 CHANNEL_LAYERS = {
