@@ -7,6 +7,7 @@ from .models import Scan, ScanResult
 from .serializers import ScanSerializer, ScanResultSerializer
 from .tasks import run_scan_task
 import logging
+import threading
 
 logger = logging.getLogger(__name__)
 
@@ -25,11 +26,19 @@ class ScanViewSet(viewsets.ModelViewSet):
                 run_scan_task.delay(scan.id)
                 logger.info(f"Scan {scan.id} created and scheduled for user {self.request.user.username}")
             except Exception as celery_error:
-                logger.warning(f"Celery not available, running scan synchronously: {celery_error}")
+                logger.warning(f"Celery not available, running scan in background thread: {celery_error}")
                 scan.status = 'in_progress'
                 scan.save()
-                run_scan_task(scan.id)
-                logger.info(f"Scan {scan.id} completed synchronously")
+                
+                def background_scan():
+                    try:
+                        run_scan_task(scan.id)
+                    except Exception as e:
+                        logger.error(f"Background scan failed for scan {scan.id}: {str(e)}")
+                
+                thread = threading.Thread(target=background_scan, daemon=True)
+                thread.start()
+                logger.info(f"Scan {scan.id} started in background thread")
         except Exception as e:
             logger.error(f"Error creating scan: {str(e)}")
             raise
