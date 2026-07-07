@@ -132,7 +132,9 @@ SIMPLE_JWT = {
     "BLACKLIST_AFTER_ROTATION": True,
 }
 
-CORS_ALLOWED_ORIGINS = config('CORS_ALLOWED_ORIGINS', default='http://localhost:3000').split(',')
+CORS_ALLOWED_ORIGINS = [
+    'https://networksecurityscanner.onrender.com',
+]
 
 CHANNEL_LAYERS = {
     "default": {
