@@ -27,7 +27,7 @@ def run_scan_task(self, scan_id):
         from services.vulnerability_detector import VulnerabilityDetector
 
         scanner = NetworkScanner()
-        results = scanner.scan(scan.target_ip)
+        results = scanner.scan(scan.target_ip, scan.scan_type)
 
         detector = VulnerabilityDetector()
         vulnerabilities = detector.detect(results)
