@@ -7,39 +7,25 @@ export const useAuth = () => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (token) {
-      setLoading(true);
-      authService.getMe()
-        .then(data => {
-          setUser(data);
-          setError(null);
-        })
-        .catch(err => {
-          console.error('Auto fetch user failed', err);
-          localStorage.removeItem('authToken');
-          setUser(null);
-          setError(null);
-        })
-        .finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    setLoading(true);
+    authService.getMe()
+      .then(data => {
+        setUser(data);
+        setError(null);
+      })
+      .catch(err => {
+        console.error('Auto fetch user failed', err);
+        setUser(null);
+        setError(null);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
   const login = useCallback(async (username, password) => {
     setLoading(true);
     setError(null);
     try {
-      const data = await authService.login(username, password);
-
-      const token = data.access || data.token;
-      if (!token) throw new Error('No token received');
-
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('refreshToken', data.refresh);
-
-      // Fetch full user profile after login
+      await authService.login(username, password);
       const userData = await authService.getMe();
       setUser(userData);
     } catch (err) {
@@ -50,8 +36,12 @@ export const useAuth = () => {
     }
   }, []);
 
-  const logout = useCallback(() => {
-    localStorage.removeItem('authToken');
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch (err) {
+      console.error('Logout failed', err);
+    }
     setUser(null);
     setError(null);
   }, []);
