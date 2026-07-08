@@ -145,8 +145,17 @@ CORS_ALLOW_CREDENTIALS = True
 # Session/Cookie support for cross-origin frontend auth flows
 SESSION_COOKIE_SAMESITE = None
 CSRF_COOKIE_SAMESITE = None
-SESSION_COOKIE_SECURE = False
-CSRF_COOKIE_SECURE = False
+# Default to secure cookies in production (when DEBUG is False)
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+
+# When behind a proxy/load-balancer that terminates TLS (e.g. Render),
+# ensure Django knows the original request scheme so secure-cookie and
+# redirect logic behave correctly.
+if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+    # Redirect HTTP to HTTPS in production
+    SECURE_SSL_REDIRECT = True
 
 # CHANNEL LAYERS: in-memory for local development, Redis for production
 if DEBUG:
