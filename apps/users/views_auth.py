@@ -7,11 +7,13 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework_simplejwt.tokens import RefreshToken
 
 # CSRF cookie endpoint
-@ensure_csrf_cookie
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def csrf_cookie(request):
-    return Response({"detail": "CSRF cookie set"})
+    token = get_token(request)
+    response = Response({"detail": "CSRF cookie set"})
+    response.set_cookie('csrftoken', token, httponly=False)
+    return response
 
 # Session-based login
 @csrf_protect

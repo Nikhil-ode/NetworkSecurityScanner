@@ -1,9 +1,16 @@
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || '';
-export const API_LOGIN = '/api/auth/auth/session-login/';
-export const API_LOGOUT = '/api/auth/auth/session-logout/';
+export const API_LOGIN = '/api/auth/session-login/';
+export const API_LOGOUT = '/api/auth/session-logout/';
 export const API_ME = '/api/auth/users/me/';
+
+const getCookie = (name) => {
+  const cookieString = document.cookie || '';
+  const cookies = cookieString.split(';').map((cookie) => cookie.trim());
+  const found = cookies.find((cookie) => cookie.startsWith(`${name}=`));
+  return found ? decodeURIComponent(found.split('=')[1]) : null;
+};
 
 // Create axios instance
 const apiClient = axios.create({
@@ -14,10 +21,20 @@ const apiClient = axios.create({
   timeout: 30000,
 });
 
-// Request interceptor - Add token to all requests
+// Request interceptor - Add credentials and CSRF token to all requests
 apiClient.interceptors.request.use(
   (config) => {
     config.withCredentials = true;
+
+    const safeMethods = ['GET', 'HEAD', 'OPTIONS', 'TRACE'];
+    const method = (config.method || '').toUpperCase();
+    if (!safeMethods.includes(method)) {
+      const csrfToken = getCookie('csrftoken');
+      if (csrfToken) {
+        config.headers['X-CSRFToken'] = csrfToken;
+      }
+    }
+
     return config;
   },
   (error) => {
@@ -62,6 +79,15 @@ export const checkApiHealth = async () => {
   } catch (error) {
     console.error('API health check failed:', error);
     return false;
+  }
+};
+
+// Utility function to fetch CSRF token
+export const fetchCsrfToken = async () => {
+  try {
+    await apiClient.get('/api/auth/csrf/');
+  } catch (error) {
+    console.error('Failed to fetch CSRF token:', error);
   }
 };
 

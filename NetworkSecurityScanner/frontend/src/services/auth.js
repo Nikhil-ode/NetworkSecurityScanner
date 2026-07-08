@@ -24,7 +24,7 @@ export const authService = {
    * @throws {AuthError} On network or authentication failure.
    */
   login: async (username, password) => {
-    const response = await apiClient.post('/api/auth/auth/session-login/', {
+    const response = await apiClient.post('/api/auth/session-login/', {
       username,
       password,
     });
@@ -35,7 +35,7 @@ export const authService = {
    * Clear authentication state and redirect to login.
    */
   logout: async () => {
-    await apiClient.post('/api/auth/auth/session-logout/');
+    await apiClient.post('/api/auth/session-logout/');
   },
 
   /**

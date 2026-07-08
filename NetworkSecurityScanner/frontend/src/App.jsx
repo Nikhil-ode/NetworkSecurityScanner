@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Navbar from './components/Navbar';
 import Home from './pages/Home';
@@ -8,6 +8,7 @@ import Scans from './pages/Scans';
 import Reports from './pages/Reports';
 import Settings from './pages/Settings';
 import { useAuth } from './hooks/useAuth';
+import { fetchCsrfToken } from './services/api';
 
 // ✅ Corrected import path for CSS (styles folder)
 import './styles/App.css';
@@ -21,8 +22,7 @@ const ProtectedRoute = ({ children, authenticated, loading }) => {
     );
   }
 
-  const hasToken = !!localStorage.getItem('authToken');
-  if (!authenticated && !hasToken) {
+  if (!authenticated) {
     return <Navigate to="/login" replace />;
   }
 
@@ -31,6 +31,11 @@ const ProtectedRoute = ({ children, authenticated, loading }) => {
 
 function App() {
   const { user, loading } = useAuth();
+
+  // Fetch the CSRF token when the app loads to enable POST requests.
+  useEffect(() => {
+    fetchCsrfToken();
+  }, []);
 
   return (
     <Router>

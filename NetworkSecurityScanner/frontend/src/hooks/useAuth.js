@@ -1,49 +1,55 @@
 import { useState, useEffect, useCallback } from 'react';
 import { authService } from '../services/auth';
 
+/**
+ * Hook for managing session-based authentication.
+ * It relies on HTTP-only session cookies and does NOT use localStorage.
+ */
 export const useAuth = () => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
+  // Check authentication status on initial load by fetching user data.
+  // A successful request means a valid session cookie exists.
+  const checkAuthStatus = useCallback(async () => {
     setLoading(true);
-    authService.getMe()
-      .then(data => {
-        setUser(data);
-        setError(null);
-      })
-      .catch(err => {
-        console.error('Auto fetch user failed', err);
-        setUser(null);
-        setError(null);
-      })
-      .finally(() => setLoading(false));
-  }, []);
-
-  const login = useCallback(async (username, password) => {
-    setLoading(true);
-    setError(null);
     try {
-      await authService.login(username, password);
       const userData = await authService.getMe();
       setUser(userData);
     } catch (err) {
-      console.error('Login failed', err);
-      setError(err.message || 'Login failed');
+      // This is expected if the user is not logged in.
+      setUser(null);
     } finally {
       setLoading(false);
     }
   }, []);
 
-  const logout = useCallback(async () => {
-    try {
-      await authService.logout();
-    } catch (err) {
-      console.error('Logout failed', err);
-    }
-    setUser(null);
+  useEffect(() => {
+    checkAuthStatus();
+  }, [checkAuthStatus]); // Empty dependency array ensures this runs only once on mount.
+
+  const login = useCallback(async (username, password) => {
+    setLoading(true);
     setError(null);
+    try {
+      // The backend sets the session cookie on successful login.
+      await authService.login(username, password);
+      // After login, fetch user data to update the state.
+      await checkAuthStatus();
+    } catch (err) {
+      setError(err.response?.data?.detail || 'Invalid credentials');
+      setUser(null);
+      throw err; // Re-throw for the component to handle
+    } finally {
+      setLoading(false);
+    }
+  }, [checkAuthStatus]);
+
+  const logout = useCallback(async () => {
+    await authService.logout();
+    setUser(null);
+    // The ProtectedRoute will handle redirection to the login page.
   }, []);
 
   return { user, loading, error, login, logout, setUser };
