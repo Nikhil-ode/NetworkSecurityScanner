@@ -140,6 +140,13 @@ REST_FRAMEWORK = {
 
 # CORS: allow all origins for deployed frontend
 CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+
+# Session/Cookie support for cross-origin frontend auth flows
+SESSION_COOKIE_SAMESITE = None
+CSRF_COOKIE_SAMESITE = None
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
 
 # CHANNEL LAYERS: in-memory for local development, Redis for production
 if DEBUG:

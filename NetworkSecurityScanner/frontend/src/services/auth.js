@@ -1,4 +1,4 @@
-import apiClient from './api';
+import apiClient, { fetchCsrfToken } from './api';
 
 /**
  * Custom error class for authentication errors
@@ -24,7 +24,8 @@ export const authService = {
    * @throws {AuthError} On network or authentication failure.
    */
   login: async (username, password) => {
-    const response = await apiClient.post('/api/auth/session-login/', {
+    await fetchCsrfToken();
+    const response = await apiClient.post('/auth/session-login/', {
       username,
       password,
     });

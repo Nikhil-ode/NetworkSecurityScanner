@@ -1,9 +1,9 @@
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || '';
-export const API_LOGIN = '/api/auth/session-login/';
-export const API_LOGOUT = '/api/auth/session-logout/';
-export const API_ME = '/api/auth/users/me/';
+export const API_LOGIN = '/auth/session-login/';
+export const API_LOGOUT = '/auth/session-logout/';
+export const API_ME = '/auth/users/me/';
 
 const getCookie = (name) => {
   const cookieString = document.cookie || '';
@@ -74,7 +74,7 @@ apiClient.interceptors.response.use(
 // Utility function to check if API is available
 export const checkApiHealth = async () => {
   try {
-    const response = await apiClient.get('/api/auth/users/me/');
+    const response = await apiClient.get(API_ME);
     return response.status === 200 || response.status === 401;
   } catch (error) {
     console.error('API health check failed:', error);
@@ -85,7 +85,7 @@ export const checkApiHealth = async () => {
 // Utility function to fetch CSRF token
 export const fetchCsrfToken = async () => {
   try {
-    await apiClient.get('/api/auth/csrf/');
+    await apiClient.get('/auth/csrf/');
   } catch (error) {
     console.error('Failed to fetch CSRF token:', error);
   }
