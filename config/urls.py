@@ -7,6 +7,7 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render
+from django.http import HttpResponse
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -15,7 +16,10 @@ from rest_framework_simplejwt.views import (
 
 @never_cache
 def index_view(request):
-    return render(request, 'index.html')
+    try:
+        return render(request, 'index.html')
+    except Exception:
+        return HttpResponse("<html><body>App is loading...</body></html>", content_type='text/html')
 
 
 urlpatterns = [
