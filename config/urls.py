@@ -23,6 +23,7 @@ urlpatterns = [
     path('auth/jwt/verify/', TokenVerifyView.as_view(), name='jwt_verify'),
 
     # ✅ Project APIs
+    path('auth/', include('apps.users.urls')),
     path('api/auth/', include('apps.users.urls')),
     path('api/scans/', include('apps.scans.urls')),
     path('api/reports/', include('apps.reports.urls')),

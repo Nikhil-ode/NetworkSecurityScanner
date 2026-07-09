@@ -1,21 +1,27 @@
+from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
-from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from django.middleware.csrf import get_token
-from rest_framework.response import Response
+from django.views.decorators.csrf import csrf_protect
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.response import Response
 
-# CSRF cookie endpoint
+
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def csrf_cookie(request):
     token = get_token(request)
     response = Response({"detail": "CSRF cookie set"})
-    response.set_cookie('csrftoken', token, httponly=False)
+    response.set_cookie(
+        'csrftoken',
+        token,
+        httponly=False,
+        samesite='None' if not settings.DEBUG else 'Lax',
+        secure=not settings.DEBUG,
+    )
     return response
 
-# Session-based login
+
 @csrf_protect
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -39,7 +45,7 @@ def session_login_view(request):
         }, status=200)
     return Response({"error": "Invalid credentials"}, status=400)
 
-# Session-based logout
+
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def session_logout_view(request):
