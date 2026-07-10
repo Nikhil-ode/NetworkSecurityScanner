@@ -2,8 +2,8 @@ services:
   - type: web
     name: network-security-scanner
     env: python
-    buildCommand: pip install -r requirements.txt
-startCommand: rm -rf staticfiles && cd NetworkSecurityScanner/frontend && npm ci --no-audit --no-fund && npm run build && cd ../../ && rm -rf static/static && mkdir -p static/static && cp -R NetworkSecurityScanner/frontend/build/static/* static/static/ && python manage.py collectstatic --noinput && python manage.py migrate --noinput && python -m daphne -b 0.0.0.0 -p $PORT config.asgi:application
+    buildCommand: pip install -r requirements.txt && cd NetworkSecurityScanner/frontend && npm ci --no-audit --no-fund && npm run build && cd ../../
+    startCommand: rm -rf staticfiles && rm -rf static/static && mkdir -p static/static && cp -R NetworkSecurityScanner/frontend/build/static/* static/static/ && python manage.py collectstatic --noinput && python manage.py migrate --noinput && python -m daphne -b 0.0.0.0 -p $PORT config.asgi:application
     envVars:
       - key: USE_SQLITE
         value: "False"
