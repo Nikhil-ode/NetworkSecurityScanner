@@ -1,9 +1,13 @@
 import axios from 'axios';
 
 const API_BASE_URL = process.env.REACT_APP_API_URL || '';
-export const API_LOGIN = '/auth/session-login/';
-export const API_LOGOUT = '/auth/session-logout/';
-export const API_ME = '/auth/users/me/';
+
+export const API_LOGIN = '/api/auth/session-login/';
+export const API_LOGOUT = '/api/auth/session-logout/';
+export const API_ME = '/api/auth/users/me/';
+export const API_REGISTER = '/api/auth/users/';
+export const API_PROFILE = '/api/auth/profiles/';
+export const API_CSRF = '/api/auth/csrf/';
 
 const getCookie = (name) => {
   const cookieString = document.cookie || '';
@@ -85,7 +89,7 @@ export const checkApiHealth = async () => {
 // Utility function to fetch CSRF token
 export const fetchCsrfToken = async () => {
   try {
-    await apiClient.get('/auth/csrf/');
+    await apiClient.get(API_CSRF);
   } catch (error) {
     console.error('Failed to fetch CSRF token:', error);
   }

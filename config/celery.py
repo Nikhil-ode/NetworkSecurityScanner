@@ -4,7 +4,7 @@ Celery app for scanner_project.
 import os
 from celery import Celery
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'scanner_project.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 
 app = Celery('scanner_project')
 app.config_from_object('django.conf:settings', namespace='CELERY')

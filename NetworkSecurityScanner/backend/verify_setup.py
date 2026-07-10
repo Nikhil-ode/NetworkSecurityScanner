@@ -9,7 +9,7 @@ import django
 from django.conf import settings
 
 # Setup Django
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'scanner_project.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
 django.setup()
 
 def check_django_setup():
@@ -137,7 +137,7 @@ def check_celery():
     """Check if Celery is configured"""
     print("\n✓ Celery Check")
     try:
-        from scanner_project.celery import app
+        from config.celery import app
         print("  ✓ Celery app loaded")
         print(f"  ✓ Broker: {settings.CELERY_BROKER_URL}")
         print(f"  ✓ Backend: {settings.CELERY_RESULT_BACKEND}")

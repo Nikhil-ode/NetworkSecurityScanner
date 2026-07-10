@@ -9,14 +9,15 @@ class SupabaseClient:
 
     def __init__(self):
         self.url = os.getenv('SUPABASE_URL')
-        self.key = os.getenv('SUPABASE_KEY')
+        # Support both SUPABASE_KEY and SUPABASE_PUBLISHABLE_KEY env vars
+        self.key = os.getenv('SUPABASE_KEY') or os.getenv('SUPABASE_PUBLISHABLE_KEY')
         self.client = None
 
         if self.url and self.key:
             try:
                 # Initialize Supabase client
-                # from supabase import create_client
-                # self.client = create_client(self.url, self.key)
+                from supabase import create_client
+                self.client = create_client(self.url, self.key)
                 logger.info("Supabase client initialized")
             except Exception as e:
                 logger.error(f"Error initializing Supabase: {str(e)}")

@@ -73,20 +73,6 @@ npm start
 
 The frontend will automatically open at: **<http://localhost:3000>**
 
-## Option 2: Docker Setup (Fastest)
-
-```bash
-# From the root directory
-docker-compose up
-```
-
-This will start:
-
-- Backend on <http://localhost:8000>
-- Frontend on <http://localhost:3000>
-- Database (PostgreSQL)
-- Redis
-
 ## Option 3: Automated Setup Script
 
 ### On macOS/Linux
@@ -236,8 +222,10 @@ docker-compose exec backend python manage.py migrate
 
 ### Authentication
 
-- `POST /api/auth/users/` - Login
+- `POST /api/auth/session-login/` - Login
 - `GET /api/auth/users/me/` - Get current user
+- `POST /api/auth/session-logout/` - Logout
+- `POST /api/auth/users/` - Register new user
 
 ### Scans
 
@@ -317,9 +305,9 @@ For more detailed documentation, see:
 
 **Solution:**
 
-1. Ensure you're logged in
-2. Check that auth token is saved in localStorage
-3. Verify token is being sent in request headers
+1. Ensure you are properly logged in.
+2. Check your browser's developer tools (Application > Cookies) to see if a `sessionid` cookie is present for the backend domain.
+3. A `403 Forbidden` error on POST requests usually indicates a missing or invalid CSRF token. The application is designed to handle this automatically, but a hard refresh (Ctrl+F5) might resolve it.
 
 ### Issue: Scans not running
 

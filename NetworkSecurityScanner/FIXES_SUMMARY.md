@@ -88,9 +88,9 @@ This document details all the bug fixes, improvements, and enhancements made to 
 
 - ✅ **useAuth Hook**:
   - Proper error handling
-  - Token management
+  - Session management (via cookies)
   - User state management
-  - Logout functionality
+  - Login/Logout functionality
   - Auto-fetch user on mount
   
 - ✅ **useScans Hook**:
@@ -162,14 +162,14 @@ This document details all the bug fixes, improvements, and enhancements made to 
 ### 4. Services
 
 - ✅ **API Client**:
-  - Token-based authentication
+  - Session-based authentication (cookies)
   - Proper headers configuration
   - Request/response interceptors
   - 401/403 error handling
   - Timeout configuration
   - Debug logging
   - API health check utility
-  - Automatic logout on token expiration
+  - Handles session expiration via 401/403 responses
 
 ### 5. Styling
 
@@ -250,7 +250,7 @@ This document details all the bug fixes, improvements, and enhancements made to 
 ### Security
 
 - ✅ CORS configuration
-- ✅ Token authentication
+- ✅ Session authentication
 - ✅ Session security settings
 - ✅ Input validation
 
@@ -278,12 +278,6 @@ This document details all the bug fixes, improvements, and enhancements made to 
 - ✅ Error states
 
 ## 📦 Deployment Ready
-
-### Docker Support
-
-- ✅ Dockerfile for backend (with Gunicorn)
-- ✅ Dockerfile for frontend (with serve)
-- ✅ docker-compose.yml with all services
 
 ### Production Checklist
 
@@ -329,9 +323,8 @@ backend/
 │   ├── __init__.py ✅
 ├── scanner_project/
 │   ├── settings.py ✅ (Fixed)
-├── logs/ ✅ (Created)
-├── verify_setup.py ✅ (Created)
-├── Dockerfile ✅
+├── logs/ ✅
+├── verify_setup.py ✅
 ├── requirements.txt ✅ (Updated)
 ├── .env ✅ (Configured)
 ├── .env.example ✅ (Enhanced)
@@ -357,7 +350,6 @@ frontend/
 │   ├── styles/
 │   │   ├── App.css ✅ (Updated)
 │   ├── App.jsx ✅ (Fixed)
-├── Dockerfile ✅
 ├── package.json ✅ (Updated)
 ├── .env.example ✅
 ```

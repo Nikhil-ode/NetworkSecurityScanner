@@ -1,4 +1,11 @@
-import apiClient, { fetchCsrfToken } from './api';
+import apiClient, {
+  fetchCsrfToken,
+  API_LOGIN,
+  API_LOGOUT,
+  API_ME,
+  API_REGISTER,
+  API_PROFILE,
+} from './api';
 
 /**
  * Custom error class for authentication errors
@@ -25,7 +32,7 @@ export const authService = {
    */
   login: async (username, password) => {
     await fetchCsrfToken();
-    const response = await apiClient.post('/auth/session-login/', {
+    const response = await apiClient.post(API_LOGIN, {
       username,
       password,
     });
@@ -36,7 +43,7 @@ export const authService = {
    * Clear authentication state and redirect to login.
    */
   logout: async () => {
-    await apiClient.post('/api/auth/session-logout/');
+    await apiClient.post(API_LOGOUT);
   },
 
   /**
@@ -45,12 +52,12 @@ export const authService = {
    * @throws {AuthError} On failure.
    */
   getMe: async () => {
-    const response = await apiClient.get('/api/auth/users/me/');
+    const response = await apiClient.get(API_ME);
     return response.data;
   },
 
   register: async (username, email, password) => {
-    const response = await apiClient.post('/api/auth/users/', {
+    const response = await apiClient.post(API_REGISTER, {
       username,
       email,
       password,
@@ -59,7 +66,7 @@ export const authService = {
   },
 
   updateProfile: async (data) => {
-    const response = await apiClient.put('/api/auth/profiles/', data);
+    const response = await apiClient.put(API_PROFILE, data);
     return response.data;
   },
 };

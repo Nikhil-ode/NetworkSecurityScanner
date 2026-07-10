@@ -1,5 +1,6 @@
 """Network scanner service"""
 import socket
+import ipaddress
 import logging
 from typing import Dict, List, Tuple
 
@@ -86,14 +87,10 @@ class NetworkScanner:
 
     def _validate_ip(self, ip: str) -> bool:
         """Validate IP address format"""
+        if not isinstance(ip, str):
+            return False
         try:
-            parts = ip.split('.')
-            if len(parts) != 4:
-                return False
-            for part in parts:
-                num = int(part)
-                if num < 0 or num > 255:
-                    return False
+            ipaddress.ip_address(ip)
             return True
-        except (ValueError, AttributeError):
+        except ValueError:
             return False

@@ -8,11 +8,7 @@ from django.conf.urls.static import static
 from django.views.decorators.cache import never_cache
 from django.shortcuts import render
 from django.http import HttpResponse
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-    TokenVerifyView,
-)
+# JWT endpoints intentionally removed (project uses session authentication only)
 
 @never_cache
 def index_view(request):
@@ -25,11 +21,6 @@ def index_view(request):
 urlpatterns = [
     # Admin panel
     path('admin/', admin.site.urls),
-
-    # ✅ JWT Auth Endpoints
-    path('auth/jwt/create/', TokenObtainPairView.as_view(), name='jwt_create'),
-    path('auth/jwt/refresh/', TokenRefreshView.as_view(), name='jwt_refresh'),
-    path('auth/jwt/verify/', TokenVerifyView.as_view(), name='jwt_verify'),
 
     # ✅ Project APIs
     path('auth/', include('apps.users.urls')),

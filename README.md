@@ -10,25 +10,24 @@ A comprehensive web-based network security scanning and vulnerability detection 
 - **Vulnerability Detection** — Detect high-risk ports, database exposures, email service leaks, and web service weaknesses
 - **Detailed Reports** — Generate comprehensive security reports in PDF, HTML, and JSON formats
 - **Real-time Monitoring** — Track scan progress and view results in real-time
-- **User Authentication** — Secure login and registration with JWT authentication (Supports Supabase integration)
+- **User Authentication** — Secure login and registration with Django's built-in session authentication
 - **Scan History** — View, filter, and manage past scan results
-- **Docker Support** — Full containerized deployment with PostgreSQL, Redis, Celery, and Celery Beat
 
 ---
 
 ## Technology Stack
 
 ### Backend
+
 | Technology | Purpose |
 | ---------- | ------- |
 | **Django** | Web framework & ORM |
 | **Django REST Framework** | RESTful API development |
 | **Celery + Redis** | Asynchronous task processing & brokering |
-| **Simple JWT** | Token-based authentication |
 | **Supabase PostgreSQL** | Cloud database (via Supavisor pooler) |
-| **Daphne** | ASGI server for production |
 
 ### Frontend
+
 | Technology | Purpose |
 | ---------- | ------- |
 | **React** | User interface library |
@@ -37,88 +36,57 @@ A comprehensive web-based network security scanning and vulnerability detection 
 | **Modern CSS** | Gradient themes, animations, responsive design |
 
 ### Infrastructure
-| Technology | Purpose |
-| ---------- | ------- |
-| **Docker & Docker Compose** | Containerized deployment |
-| **PostgreSQL** | Relational database |
-| **Redis** | Cache & message broker |
+
+This project is configured to run without containers, using a local development server for the frontend and backend, connected to a cloud-based Supabase PostgreSQL database.
 
 ---
 
-## Project Structure
+## 🚀 Setup and Run (10-15 minutes)
 
-```
-NetworkSecurity Scanner/
-├── apps/                       # Django application modules
-│   ├── reports/                # Report generation logic
-│   ├── scans/                  # Scan operations & management
-│   ├── users/                  # User authentication & management
-│   └── vulnerabilities/        # Vulnerability tracking & detection
-├── config/                     # Django project configuration
-│   ├── settings.py             # Settings (DB, auth, CORS, etc.)
-│   ├── urls.py                 # Root URL configuration
-│   ├── asgi.py / wsgi.py       # ASGI & WSGI entry points
-│   └── celery.py               # Celery task queue config
-├── services/                   # Core scanning & detection services
-│   ├── scanner.py              # Socket-based TCP port scanner
-│   └── vulnerability_detector.py  # Vulnerability identification
-├── NetworkSecurityScanner/     # Frontend + alternative backend
-│   ├── frontend/               # React application (src/, public/)
-│   ├── backend/                # Standalone Django backend with Dockerfile
-│   └── docs/                   # Extended documentation
-├── logs/                       # Application log files
-├── staticfiles/                # Collected static assets
-├── manage.py                   # Django management script
-├── run_https.py                # HTTPS development server launcher
-├── requirements_backup.txt     # Python dependencies
-├── start_project.bat           # Windows setup script
-└── .env                        # Environment variables (credentials)
-```
+### 1. Prerequisites
 
----
-
-## Quick Start
-
-### Prerequisites
-
-- Python 3.14+
-- Node.js 24+
+- Python 3.8+
+- Node.js 14+
 - npm
+- **Redis**: For running background scans. [Installation Guide](https://redis.io/docs/getting-started/installation/)
+- **nmap**: For advanced scanning capabilities. [Installation Guide](https://nmap.org/book/inst-windows.html)
 - Supabase account (for cloud database)
 - PostgreSQL client (psql) — optional, for migrations
 
 ---
 
-### Supabase Setup
+### 2. Configure Environment
 
 1. Create a Supabase project at [supabase.com](https://supabase.com)
 2. Go to **Project Settings** > **Database**
 3. Copy your credentials:
    - **Project ID** (from URL or Database settings)
    - **Database Password**
-   - **Connection Pooler** (Supavisor) connection string
-4. Configure `.env` in the project root:
+   - **Host** (from Connection Pooler / Supavisor)
+4. Create a `.env` file in the project root by copying `.env.example` and fill in your Supabase credentials.
 
 ```env
 DEBUG=True
 SECRET_KEY=your-secret-key-here
 ALLOWED_HOSTS=localhost,127.0.0.1
-CORS_ALLOWED_ORIGINS=http://localhost:3000
+CORS_ALLOWED_ORIGINS=http://localhost:3000,https://localhost:3000
 
 # Supabase PostgreSQL via Supavisor Connection Pooler
 USE_SQLITE=False
 DB_NAME=postgres
 DB_USER=postgres.<your-project-id>
 DB_PASSWORD=<your-database-password>
-DB_HOST=aws-1-ap-northeast-1.pooler.supabase.com
+DB_HOST=<your-supabase-db-host>
 DB_PORT=5432
+
+# Redis for Celery
 CELERY_BROKER_URL=redis://localhost:6379/0
 CELERY_RESULT_BACKEND=redis://localhost:6379/0
 ```
 
 > **Important:** Replace `<your-project-id>` and `<your-database-password>` with your actual Supabase credentials.
 
-5. Run database migrations:
+1. Run database migrations:
 
 ```bash
 # Option 1: Using Django management command
@@ -137,7 +105,7 @@ python manage.py migrate
 venv\Scripts\activate
 
 # 2. Install dependencies
-pip install -r requirements_backup.txt
+pip install -r requirements.txt
 
 # 3. Start the backend server (HTTPS)
 python run_https.py
@@ -169,18 +137,16 @@ The frontend will be available at **`https://localhost:3000`**
 ### Authentication
 
 | Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/login/` | User login |
-| `POST` | `/api/auth/register/` | User registration |
+| --- | --- | --- |
+| `POST` | `/api/auth/session-login/` | User login with session |
+| `POST` | `/api/auth/session-logout/` | User logout |
+| `POST` | `/api/auth/users/` | User registration |
 | `GET` | `/api/auth/users/me/` | Get current user |
-| `POST` | `/api/auth/jwt/create/` | Create JWT token |
-| `POST` | `/api/auth/jwt/refresh/` | Refresh JWT token |
-| `POST` | `/api/auth/jwt/verify/` | Verify JWT token |
 
 ### Scans
 
 | Method | Endpoint | Description |
-|---|---|---|
+| --- | --- | --- |
 | `GET` | `/api/scans/` | List all scans |
 | `POST` | `/api/scans/` | Create a new scan |
 | `GET` | `/api/scans/{id}/` | Get scan details |
@@ -190,7 +156,7 @@ The frontend will be available at **`https://localhost:3000`**
 ### Reports
 
 | Method | Endpoint | Description |
-|---|---|---|
+| --- | --- | --- |
 | `GET` | `/api/reports/` | List all reports |
 | `GET` | `/api/reports/{id}/` | Get report details |
 | `GET` | `/api/reports/{id}/download/?format=pdf` | Download report (pdf/html/json) |
@@ -217,39 +183,21 @@ The frontend will be available at **`https://localhost:3000`**
 
 ---
 
-## Docker Deployment
-
-Run the entire application stack with Docker Compose:
-
-```bash
-docker-compose up
-```
-
-This will start:
-- Django Backend on port 8000
-- React Frontend on port 3000
-- PostgreSQL database
-- Redis cache & message broker
-- Celery Worker for async tasks
-- Celery Beat for scheduled tasks
-
----
-
 ## Testing the Application
 
 ### Test Credentials
 
 | Username | Password |
-|---|---|
+| --- | --- |
 | nikhilrajput | nikhil123 |
 | testuser | test123 |
 
-Or register new users via `POST /api/auth/register/`.
+Or register new users via `POST /api/auth/users/`.
 
 ### Quick API Test (cURL)
 
 ```bash
-curl -k -X POST https://localhost:8443/auth/jwt/create/ \
+curl -k -c cookie.txt -X POST https://localhost:8443/api/auth/session-login/ \
   -H "Content-Type: application/json" \
   -d '{"username":"nikhilrajput","password":"nikhil123"}'
 ```
@@ -261,22 +209,26 @@ Note: Disable SSL verification for localhost self-signed certificates.
 ## Troubleshooting
 
 ### Database Connection Issues
+
 - Ensure Supabase credentials are correct in .env
 - Verify USE_SQLITE=False is set
 - Check Supabase project is active (not paused)
 - Test connection: `psql -h aws-1-ap-northeast-1.pooler.supabase.com -U postgres.<project-id> -d postgres -p 5432`
 
 ### Authentication Issues
+
 - Verify SUPABASE_URL and API keys in .env
 - Check that Supabase Auth is enabled
 - Ensure Row Level Security (RLS) policies are configured
 
 ### Port Already in Use
+
 ```bash
 taskkill /F /IM python.exe
 ```
 
 ### Frontend Not Loading
+
 ```bash
 npm cache clean --force
 rm -rf node_modules
@@ -290,6 +242,7 @@ This project uses a self-signed certificate for HTTPS development. Browsers will
 > "Your connection is not private" / "ERR_CERT_AUTHORITY_INVALID"
 
 This is safe for development. To proceed:
+
 - On Desktop: Click Advanced -> Proceed to localhost (unsafe)
 - On Mobile: Tap Advanced -> Proceed to website (unsafe)
 
