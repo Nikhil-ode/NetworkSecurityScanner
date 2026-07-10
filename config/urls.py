@@ -38,4 +38,8 @@ urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 urlpatterns += [
     re_path(r'^(?!api/|auth/jwt/|auth/|static/|media/).+$', index_view, name='home'),
     re_path(r'^$', index_view, name='home_root'),
+    # --- Compatibility: avoid hard 404 when frontend accidentally calls /api/api/... ---
+    # This redirects /api/api/<path> -> /api/<path>.
+    re_path(r'^api/api/(?P<subpath>.+)$', lambda request, subpath: HttpResponse(status=301)),
 ]
+
