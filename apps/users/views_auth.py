@@ -32,18 +32,22 @@ def session_login_view(request):
     if not username or not password:
         return Response({"error": "Username and password required"}, status=400)
 
-    user = authenticate(request, username=username, password=password)
-    if user:
-        login(request, user)
-        return Response({
-            "message": "Login successful",
-            "user": {
-                "id": user.id,
-                "username": user.username,
-                "email": user.email,
-            }
-        }, status=200)
-    return Response({"error": "Invalid credentials"}, status=400)
+    try:
+        user = authenticate(request, username=username, password=password)
+        if user:
+            login(request, user)
+            return Response({
+                "message": "Login successful",
+                "user": {
+                    "id": user.id,
+                    "username": user.username,
+                    "email": user.email,
+                }
+            }, status=200)
+        return Response({"error": "Invalid credentials"}, status=400)
+    except Exception as e:
+        # Helps identify CSRF/session/cookie failures in production logs & response
+        return Response({"error": "Login exception", "detail": str(e)}, status=403)
 
 
 @api_view(['POST'])
