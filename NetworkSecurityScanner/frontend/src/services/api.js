@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = ''; // Always use relative URLs to avoid /api prefix duplication in production
+const API_BASE_URL = window.location.origin; // Prevent any relative path concatenation (/api/api...)
 
 export const API_LOGIN = '/api/auth/session-login/';
 export const API_LOGOUT = '/api/auth/session-logout/';
