@@ -168,6 +168,12 @@ CSRF_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
 
+# Render/CORS domain cookie persistence
+COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN', 'networksecurityscanner.onrender.com')
+SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
+CSRF_COOKIE_DOMAIN = COOKIE_DOMAIN
+CSRF_USE_SESSIONS = True
+
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
