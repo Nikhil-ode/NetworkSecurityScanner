@@ -47,7 +47,10 @@ def session_login_view(request):
         return Response({"error": "Invalid credentials"}, status=400)
     except Exception as e:
         # Helps identify CSRF/session/cookie failures in production logs & response
-        return Response({"error": "Login exception", "detail": str(e)}, status=403)
+        detail = str(e)
+        if 'CSRF' in detail or 'csrf' in detail:
+            detail = f"CSRF failed: {detail}"
+        return Response({"error": "Login exception", "detail": detail}, status=403)
 
 
 @api_view(['POST'])
