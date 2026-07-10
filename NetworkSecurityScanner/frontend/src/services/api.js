@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || '';
+const API_BASE_URL = ''; // Always use relative URLs to avoid /api prefix duplication in production
 
 export const API_LOGIN = '/auth/session-login/';
 export const API_LOGOUT = '/auth/session-logout/';
