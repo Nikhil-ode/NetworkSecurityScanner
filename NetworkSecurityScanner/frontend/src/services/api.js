@@ -2,12 +2,12 @@ import axios from 'axios';
 
 const API_BASE_URL = ''; // Always use relative URLs to avoid /api prefix duplication in production
 
-export const API_LOGIN = '/auth/session-login/';
-export const API_LOGOUT = '/auth/session-logout/';
-export const API_ME = '/auth/users/me/';
-export const API_REGISTER = '/auth/users/';
-export const API_PROFILE = '/auth/profiles/';
-export const API_CSRF = '/auth/csrf/';
+export const API_LOGIN = '/api/auth/session-login/';
+export const API_LOGOUT = '/api/auth/session-logout/';
+export const API_ME = '/api/auth/users/me/';
+export const API_REGISTER = '/api/auth/users/';
+export const API_PROFILE = '/api/auth/profiles/';
+export const API_CSRF = '/api/auth/csrf/';
 
 const getCookie = (name) => {
   const cookieString = document.cookie || '';
