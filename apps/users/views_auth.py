@@ -31,8 +31,19 @@ def csrf_cookie(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def session_login_view(request):
-    username = request.data.get('username')
-    password = request.data.get('password')
+    # Accept JSON or form-encoded payload to avoid strict body parsing issues on proxies
+    username = None
+    password = None
+
+    if hasattr(request, 'data') and isinstance(request.data, (dict,)):
+        username = request.data.get('username')
+        password = request.data.get('password')
+
+    # Fallback to form POST
+    if (not username or not password) and hasattr(request, 'POST'):
+        username = username or request.POST.get('username')
+        password = password or request.POST.get('password')
+
 
     if not username or not password:
         return Response({
