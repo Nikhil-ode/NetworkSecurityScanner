@@ -31,25 +31,15 @@ def csrf_cookie(request):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def session_login_view(request):
-    # Robust payload parsing (Render/Daphne/proxies sometimes affect DRF parsing)
-    username = request.data.get('username') if hasattr(request, 'data') else None
-    password = request.data.get('password') if hasattr(request, 'data') else None
-
-    # Fallback: try parsing body as JSON
-    if (not username or not password) and request.body:
-        try:
-            import json
-            body = json.loads(request.body.decode('utf-8'))
-            username = username or body.get('username')
-            password = password or body.get('password')
-        except Exception:
-            pass
+    username = request.data.get('username')
+    password = request.data.get('password')
 
     if not username or not password:
         return Response({
             "error": "Username and password required",
             "received": request.data,
         }, status=400)
+
 
 
     try:
