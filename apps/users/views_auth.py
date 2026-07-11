@@ -2,11 +2,13 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
 from django.views.decorators.csrf import csrf_protect
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
+from rest_framework.parsers import JSONParser
+import logging
 
+logger = logging.getLogger(__name__)
 
 
 @api_view(['GET'])
@@ -31,35 +33,36 @@ def csrf_cookie(request):
 @api_view(['POST'])
 @csrf_protect
 @permission_classes([AllowAny])
+@parser_classes([JSONParser])
 def session_login_view(request):
     username = request.data.get('username')
     password = request.data.get('password')
 
     if not username or not password:
+        logger.warning("Login failed: username or password not provided.")
         return Response({
-            "error": "Username and password required",
-            "received": request.data,
+            "error": "Username and password are required",
         }, status=400)
 
-    try:
-        user = authenticate(request, username=username, password=password)
-        if user:
-            login(request, user)
-            return Response({
-                "message": "Login successful",
-                "user": {
-                    "id": user.id,
-                    "username": user.username,
-                    "email": user.email,
-                }
-            }, status=200)
-        return Response({"error": "Invalid credentials"}, status=400)
-    except Exception as e:
-        # Helps identify CSRF/session/cookie failures in production logs & response
-        detail = str(e)
-        if 'CSRF' in detail or 'csrf' in detail:
-            detail = f"CSRF failed: {detail}"
-        return Response({"error": "Login exception", "detail": detail}, status=403)
+    user = authenticate(request, username=username, password=password)
+
+    if user is not None:
+        login(request, user)
+        # Explicitly save the session to ensure the session cookie is sent.
+        request.session.save()
+        logger.info(f"User '{username}' logged in successfully.")
+        return Response({
+            "message": "Login successful",
+            "user": {
+                "id": user.id,
+                "username": user.username,
+                "email": user.email,
+            }
+        }, status=200)
+    else:
+        # Note: authenticate returns None for inactive users, too.
+        logger.warning(f"Failed login attempt for username: '{username}'")
+        return Response({"error": "Invalid credentials or user is inactive."}, status=400)
 
 
 @api_view(['POST'])
