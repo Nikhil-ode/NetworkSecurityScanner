@@ -27,7 +27,6 @@ def csrf_cookie(request):
 
 
 
-@csrf_protect
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def session_login_view(request):
