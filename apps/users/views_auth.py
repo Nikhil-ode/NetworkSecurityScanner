@@ -5,6 +5,8 @@ from django.views.decorators.csrf import csrf_protect
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.parsers import JSONParser, FormParser, MultiPartParser
+
 
 
 @api_view(['GET'])
@@ -27,7 +29,7 @@ def csrf_cookie(request):
 
 
 
-@api_view(['POST'])
+@api_view(['POST'], parser_classes=[JSONParser, FormParser, MultiPartParser])
 @permission_classes([AllowAny])
 def session_login_view(request):
     # Accept JSON or form-encoded payload to avoid strict body parsing issues on proxies
