@@ -10,6 +10,10 @@ from rest_framework.response import Response
 @api_view(['GET'])
 @permission_classes([AllowAny])
 def csrf_cookie(request):
+    # Ensure a session exists so SessionAuthentication can recognize the user later
+    request.session.modified = True
+    request.session.save()
+
     token = get_token(request)
     response = Response({"detail": "CSRF cookie set"})
     response.set_cookie(
@@ -20,6 +24,7 @@ def csrf_cookie(request):
         secure=not settings.DEBUG,
     )
     return response
+
 
 
 @csrf_protect
