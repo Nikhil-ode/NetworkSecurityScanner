@@ -18,6 +18,19 @@ def index_view(request):
         return HttpResponse("<html><body>App is loading...</body></html>", content_type='text/html')
 
 
+def redirect_duplicate_api_path(request, subpath):
+    """Support older frontend bundles that prefix the API path twice."""
+    target = f'/api/{subpath}'
+    query_string = request.META.get('QUERY_STRING')
+    if query_string:
+        target = f'{target}?{query_string}'
+
+    # 307 keeps the original HTTP method and request body for all API calls.
+    response = HttpResponse(status=307)
+    response['Location'] = target
+    return response
+
+
 urlpatterns = [
     # Admin panel
     path('admin/', admin.site.urls),
@@ -40,6 +53,6 @@ urlpatterns += [
     re_path(r'^$', index_view, name='home_root'),
     # --- Compatibility: avoid hard 404 when frontend accidentally calls /api/api/... ---
     # This redirects /api/api/<path> -> /api/<path>.
-    re_path(r'^api/api/(?P<subpath>.+)$', lambda request, subpath: HttpResponse(status=301)),
+    re_path(r'^api/api/(?P<subpath>.+)$', redirect_duplicate_api_path),
 ]
 

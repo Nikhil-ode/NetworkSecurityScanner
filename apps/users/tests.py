@@ -33,3 +33,9 @@ class SessionLoginTests(TestCase):
         current_user_response = client.get('/api/auth/users/me/')
         self.assertEqual(current_user_response.status_code, 200)
         self.assertEqual(current_user_response.json()['username'], self.user.username)
+
+    def test_duplicate_api_prefix_redirects_to_the_actual_endpoint(self):
+        response = self.client.get('/api/api/auth/users/me/?source=legacy')
+
+        self.assertEqual(response.status_code, 307)
+        self.assertEqual(response['Location'], '/api/auth/users/me/?source=legacy')
