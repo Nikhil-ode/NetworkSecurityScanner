@@ -26,7 +26,12 @@ const Login = () => {
       navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
-      setError(err.response?.data?.detail || err.message || 'Invalid username or password');
+      setError(
+        err.response?.data?.error ||
+        err.response?.data?.detail ||
+        err.message ||
+        'Invalid username or password'
+      );
     } finally {
       setLoading(false);
     }

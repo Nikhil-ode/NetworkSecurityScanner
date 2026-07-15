@@ -1,7 +1,6 @@
-from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.middleware.csrf import get_token
-from django.views.decorators.csrf import csrf_protect
+from django.views.decorators.csrf import csrf_protect, ensure_csrf_cookie
 from rest_framework.decorators import api_view, permission_classes, parser_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
@@ -13,21 +12,12 @@ logger = logging.getLogger(__name__)
 
 @api_view(['GET'])
 @permission_classes([AllowAny])
+@ensure_csrf_cookie
 def csrf_cookie(request):
-    # Ensure a session exists so SessionAuthentication can recognize the user later
-    request.session.modified = True
-    request.session.save()
-
-    token = get_token(request)
-    response = Response({"detail": "CSRF cookie set"})
-    response.set_cookie(
-        'csrftoken',
-        token,
-        httponly=False,
-        samesite='None' if not settings.DEBUG else 'Lax',
-        secure=not settings.DEBUG,
-    )
-    return response
+    # get_token marks the request so Django's CSRF middleware writes the
+    # cookie using the settings configured for the current environment.
+    get_token(request)
+    return Response({"detail": "CSRF cookie set"})
 
 
 @api_view(['POST'])

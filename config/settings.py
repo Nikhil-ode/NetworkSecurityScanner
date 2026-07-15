@@ -150,13 +150,13 @@ FRONTEND_ORIGIN_DEFAULT = 'https://networksecurityscanner.onrender.com'
 
 CORS_ALLOWED_ORIGINS_ENV = os.environ.get(
     'CORS_ALLOWED_ORIGINS',
-    f'{FRONTEND_ORIGIN_DEFAULT},http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000',
+    f'{FRONTEND_ORIGIN_DEFAULT},http://localhost:3000,http://127.0.0.1:3000,https://localhost:3001,https://127.0.0.1:3001,http://localhost:8000,http://127.0.0.1:8000',
 )
 CORS_ALLOWED_ORIGINS = [origin.strip() for origin in CORS_ALLOWED_ORIGINS_ENV.split(',') if origin.strip()]
 
 CSRF_TRUSTED_ORIGINS_ENV = os.environ.get(
     'CSRF_TRUSTED_ORIGINS',
-    f'{FRONTEND_ORIGIN_DEFAULT},http://localhost:3000,http://127.0.0.1:3000,http://localhost:8000,http://127.0.0.1:8000',
+    f'{FRONTEND_ORIGIN_DEFAULT},http://localhost:3000,http://127.0.0.1:3000,https://localhost:3001,https://127.0.0.1:3001,http://localhost:8000,http://127.0.0.1:8000',
 )
 CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in CSRF_TRUSTED_ORIGINS_ENV.split(',') if origin.strip()]
 
@@ -168,11 +168,14 @@ CSRF_COOKIE_SAMESITE = 'None' if not DEBUG else 'Lax'
 SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
 
-# Render/CORS domain cookie persistence
-COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN', 'networksecurityscanner.onrender.com')
-SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
-CSRF_COOKIE_DOMAIN = COOKIE_DOMAIN
-CSRF_USE_SESSIONS = True
+# Leave cookie domains unset by default.  A fixed production domain makes a
+# browser reject session cookies during local development (localhost:3001).
+# Set COOKIE_DOMAIN explicitly only when the frontend and API are intentionally
+# hosted on subdomains that need to share cookies.
+COOKIE_DOMAIN = os.environ.get('COOKIE_DOMAIN')
+if COOKIE_DOMAIN:
+    SESSION_COOKIE_DOMAIN = COOKIE_DOMAIN
+    CSRF_COOKIE_DOMAIN = COOKIE_DOMAIN
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
