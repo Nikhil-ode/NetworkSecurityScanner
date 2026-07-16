@@ -23,7 +23,12 @@ const Login = () => {
 
     try {
       await login(username, password);
-      navigate('/dashboard');
+      // Ensure auth state is refreshed before showing protected UI
+      // (prevents header username not updating until manual refresh)
+      // Small timeout allows React to re-render with updated cookie/session.
+      setTimeout(() => {
+        navigate('/dashboard');
+      }, 0);
     } catch (err) {
       console.error('Login error:', err);
       setError(
