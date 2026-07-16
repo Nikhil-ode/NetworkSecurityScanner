@@ -25,12 +25,16 @@ const Login = () => {
     try {
       await login(username, password);
       // Immediately verify session after login to avoid race where /me is 403 until next refresh.
-      // `useAuth()` already exposes `setUser`, but easiest + reliable is to call getMe here.
-      // This ensures session cookie is persisted server-side before redirect.
       try {
+        // Retry once: sometimes first /me after login arrives before session is fully persisted.
         await authService.getMe();
       } catch (e) {
-        // ignore; ProtectedRoute will re-check on load
+        await new Promise((r) => setTimeout(r, 300));
+        try {
+          await authService.getMe();
+        } catch (e2) {
+          // ignore; ProtectedRoute will re-check on load
+        }
       }
       navigate('/dashboard');
     } catch (err) {
