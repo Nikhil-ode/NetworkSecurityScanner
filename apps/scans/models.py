@@ -11,7 +11,7 @@ class Scan(models.Model):
     ]
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='scans')
-    target_ip = models.CharField(max_length=15)
+    target_ip = models.CharField(max_length=255)
     target_domain = models.CharField(max_length=255, blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
     scan_type = models.CharField(max_length=50, default='full')

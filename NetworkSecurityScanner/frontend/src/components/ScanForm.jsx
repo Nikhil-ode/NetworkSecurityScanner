@@ -10,12 +10,17 @@ const ScanForm = ({ onScanCreated }) => {
   const [success, setSuccess] = useState('');
   const { post } = useAPI();
 
-  const validateIP = (ip) => {
-    const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
-    if (!ipRegex.test(ip)) return false;
-    const parts = ip.split('.');
-    return parts.every(part => parseInt(part) >= 0 && parseInt(part) <= 255);
-  };
+    const validateIP = (ip) => {
+      // Allow any valid IP address or domain name
+      const ipRegex = /^(\d{1,3}\.){3}\d{1,3}$/;
+      const domainRegex = /^[a-zA-Z0-9][a-zA-Z0-9-]{0,61}[a-zA-Z0-9](?:\.[a-zA-Z]{2,})+$/;
+      
+      if (ipRegex.test(ip)) {
+        const parts = ip.split('.');
+        return parts.every(part => parseInt(part) >= 0 && parseInt(part) <= 255);
+      }
+      return domainRegex.test(ip);
+    };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +34,7 @@ const ScanForm = ({ onScanCreated }) => {
     }
 
     if (!validateIP(targetIp)) {
-      setError('Please enter a valid IP address (e.g., 192.168.1.1)');
+      setError('Please enter a valid IP address or Domain Name (e.g., 192.168.1.1 or example.com)');
       return;
     }
 
@@ -71,17 +76,17 @@ const ScanForm = ({ onScanCreated }) => {
       {success && <div className="success-message">{success}</div>}
 
       <div className="form-group">
-        <label htmlFor="targetIp">Target IP Address *</label>
+        <label htmlFor="targetIp">Target IP Address or Domain *</label>
         <input
           type="text"
           id="targetIp"
           value={targetIp}
           onChange={(e) => setTargetIp(e.target.value)}
-          placeholder="192.168.1.1"
+          placeholder="192.168.1.1 or example.com"
           disabled={loading}
           required
         />
-        <small>Enter the IP address you want to scan</small>
+        <small>Enter the IP address or domain name you want to scan</small>
       </div>
 
       <div className="form-group">
