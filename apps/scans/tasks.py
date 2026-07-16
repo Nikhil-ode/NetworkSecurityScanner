@@ -32,6 +32,21 @@ def run_scan_task(self, scan_id):
         detector = VulnerabilityDetector()
         vulnerabilities = detector.detect(results)
 
+        # Save vulnerabilities to the database
+        from apps.vulnerabilities.models import Vulnerability
+        # Clear any existing vulnerabilities for this scan to avoid duplicates
+        Vulnerability.objects.filter(scan=scan).delete()
+        for v in vulnerabilities:
+            Vulnerability.objects.create(
+                scan=scan,
+                title=v.get('name', 'Vulnerability'),
+                description=v.get('description', ''),
+                severity=v.get('severity', 'info').lower(),
+                port=v.get('port', 0),
+                affected_service=results.get('services', [{}])[0].get('service', 'unknown') if results.get('services') else 'unknown',
+                remediation=v.get('recommendation', '')
+            )
+
         scan_result, created = ScanResult.objects.get_or_create(scan=scan)
         scan_result.open_ports = results.get('open_ports', [])
         scan_result.services = results.get('services', [])
@@ -58,3 +73,4 @@ def run_scan_task(self, scan_id):
             pass
         # Retry the task
         raise self.retry(exc=e, countdown=60)
+
