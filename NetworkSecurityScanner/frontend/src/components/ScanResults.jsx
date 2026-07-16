@@ -22,8 +22,11 @@ const ScanResults = ({ scan }) => {
 
       // Fetch detailed scan result data
       try {
-        const resData = await get(`/scans/${scan.id}/result/`);
-        setResult(resData);
+        const resData = await get(`/scans/results/`);
+        const matchedResult = Array.isArray(resData) 
+          ? resData.find(r => r.scan === scan.id) 
+          : (resData.results || []).find(r => r.scan === scan.id);
+        setResult(matchedResult || null);
       } catch (e) {
         // Result might not be created yet if scan is in progress
         setResult(null);
