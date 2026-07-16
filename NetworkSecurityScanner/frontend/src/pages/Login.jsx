@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { authService } from '../services/auth';
 
 const Login = () => {
   const [username, setUsername] = useState('');
@@ -23,12 +24,15 @@ const Login = () => {
 
     try {
       await login(username, password);
-      // Ensure auth state is refreshed before showing protected UI
-      // (prevents header username not updating until manual refresh)
-      // Small timeout allows React to re-render with updated cookie/session.
-      setTimeout(() => {
-        navigate('/dashboard');
-      }, 0);
+      // Immediately verify session after login to avoid race where /me is 403 until next refresh.
+      // `useAuth()` already exposes `setUser`, but easiest + reliable is to call getMe here.
+      // This ensures session cookie is persisted server-side before redirect.
+      try {
+        await authService.getMe();
+      } catch (e) {
+        // ignore; ProtectedRoute will re-check on load
+      }
+      navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
       setError(
