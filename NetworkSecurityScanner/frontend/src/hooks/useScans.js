@@ -8,11 +8,7 @@ export const useScans = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchScans();
-  }, []);
-
-  const fetchScans = async () => {
+  const fetchScans = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
@@ -26,7 +22,11 @@ export const useScans = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchScans();
+  }, [fetchScans]);
 
   const createScan = useCallback(async (scanData) => {
     try {

@@ -23,6 +23,16 @@ const Dashboard = () => {
     refreshScans();
   };
 
+  // Update selectedScan details in real-time when scans list updates
+  useEffect(() => {
+    if (selectedScan) {
+      const updated = scans.find(s => s.id === selectedScan.id);
+      if (updated && JSON.stringify(updated) !== JSON.stringify(selectedScan)) {
+        setSelectedScan(updated);
+      }
+    }
+  }, [scans, selectedScan]);
+
   return (
     <div className="dashboard" style={{ maxWidth: '1100px', margin: '0 auto', padding: '2rem 1rem' }}>
       <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
