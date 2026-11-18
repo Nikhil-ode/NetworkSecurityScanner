@@ -14,15 +14,15 @@ const ScanResults = ({ scan }) => {
     setError('');
     try {
       // Fetch scan result details
-      const data = await get(`/scans/${scan.id}/`);
+      const data = await get(`/api/scans/${scan.id}/`);
       
       // Fetch vulnerabilities for this scan
-      const vulns = await get(`/vulnerabilities/?scan=${scan.id}`);
+      const vulns = await get(`/api/vulnerabilities/?scan=${scan.id}`);
       setVulnerabilities(Array.isArray(vulns) ? vulns : vulns.results || []);
 
       // Fetch detailed scan result data
       try {
-        const resData = await get(`/scans/results/`);
+        const resData = await get(`/api/scans/results/`);
         const matchedResult = Array.isArray(resData) 
           ? resData.find(r => r.scan === scan.id) 
           : (resData.results || []).find(r => r.scan === scan.id);

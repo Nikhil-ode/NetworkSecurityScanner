@@ -16,4 +16,4 @@ class ReportViewSet(viewsets.ModelViewSet):
     @action(detail=True, methods=['get'])
     def download(self, request, pk=None):
         report = self.get_object()
-        return Response({'download_url': report.file_path.url})
+        return Response({'download_url': report.file_path})

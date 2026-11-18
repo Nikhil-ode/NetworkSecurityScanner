@@ -187,7 +187,11 @@ class NetworkScanner:
                         "service": service_name,
                         "banner": banner[:200] if banner else ""
                     })
-                sock.close()
+            finally:
+                try:
+                    sock.close()
+                except Exception:
+                    pass
             except Exception:
                 pass
 

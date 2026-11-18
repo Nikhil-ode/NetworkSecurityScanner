@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Dashboard from './pages/Dashboard';
 import Scans from './pages/Scans';
 import Reports from './pages/Reports';
+import Register from './pages/Register';
 import Settings from './pages/Settings';
 import { useAuth } from './hooks/useAuth';
 import { fetchCsrfToken } from './services/api';
@@ -45,6 +46,7 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route
               path="/dashboard"
               element={

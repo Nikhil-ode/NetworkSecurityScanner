@@ -47,7 +47,7 @@ const ScanForm = ({ onScanCreated }) => {
         scan_type: scanType,
       };
 
-      const result = await post('/scans/', data);
+      const result = await post('/api/scans/', data);
       setTargetIp('');
       setTargetDomain('');
       setScanType('full');
