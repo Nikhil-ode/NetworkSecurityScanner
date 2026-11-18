@@ -34,4 +34,4 @@ Desktop.ini
 docker-compose.override.yml
 
 # Test outputs
-thunder-tests/
+thunder-tests/req.txt
