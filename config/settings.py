@@ -1,5 +1,6 @@
 import os
 import logging
+from datetime import timedelta
 
 # Suppress noisy asyncio CancelledError logs in Daphne/ASGI
 logging.getLogger("asyncio").setLevel(logging.CRITICAL)
@@ -31,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'rest_framework_simplejwt',
     'apps.users',
     'apps.scans',
     'apps.reports',
@@ -72,6 +74,7 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/3.2/ref/settings/#databases
 
+# 🔄 Switch between SQLite (development) and Supabase PostgreSQL (production)
 USE_SQLITE = str(os.environ.get('USE_SQLITE', 'True')).lower() in {'1', 'true', 'yes', 'on'}
 
 if USE_SQLITE:
@@ -82,13 +85,14 @@ if USE_SQLITE:
         }
     }
 else:
+    # 🔄 Supabase PostgreSQL Configuration
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
             'NAME': os.environ.get('DB_NAME', 'postgres'),
             'USER': os.environ.get('DB_USER', 'postgres'),
             'PASSWORD': os.environ.get('DB_PASSWORD', ''),
-            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'HOST': os.environ.get('DB_HOST', 'db.xyz.supabase.co'),
             'PORT': os.environ.get('DB_PORT', '5432'),
         }
     }
@@ -143,6 +147,41 @@ WHITENOISE_AUTOREFRESH = False
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Django REST Framework Simple JWT Configuration
+# https://django-rest-framework-simplejwt.readthedocs.io/en/latest/
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=5),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+    'ROTATE_REFRESH_TOKENS': True,
+    'BLACKLIST_AFTER_ROTATION': True,
+    'UPDATE_LAST_USED': True,
+    'ALGORITHM': 'HS256',
+    'SIGNING_KEY': SECRET_KEY,
+    'VERIFYING_KEY': None,
+    'AUDIENCE': None,
+    'ISSUER': None,
+    'JWK_URL': None,
+    'JWK_PUBLIC_KEY': None,
+    'JSON_ENCODER_NONE': False,
+    'POLL_FREQUENCY': 0.05,
+    'USER_ID_FIELD': 'id',
+    'USER_ID_CLAIM': 'user_id',
+    'USER_AUTHENTICATION_RULE': 'rest_framework_simplejwt.authentication.default_user_authentication_rule',
+    'AUTH_TOKEN_CLAMS': False,
+    'AUTH_TOKEN_USER_ID': 'dj_rest_auth.jwt_auth.ClaimsUser.id',
+    'SLIDING_TOKEN_REFRESH_EXP_CLAIM': 'refresh_exp',
+    'SLIDING_TOKEN_LIFETIME': timedelta(minutes=5),
+    'SLIDING_TOKEN_REFRESH_LIFETIME': timedelta(days=1),
+    'TOKEN_OBTAIN_SERIALIZER': 'rest_framework_simplejwt.token_obtain_pair.TokenObtainPairSerializer',
+    'TOKEN_REFRESH_SERIALIZER': 'rest_framework_simplejwt.token_refresh.TokenRefreshSerializer',
+    'TOKEN_VERIFY_SERIALIZER': 'rest_framework_simplejwt.token_verify.TokenVerifySerializer',
+    'TOKEN_BLACKLIST_SERIALIZER': 'rest_framework_simplejwt.token_blacklist.BlacklistSerializer',
+    'AI_POWERED_TOKEN': False,
+    'FIELDS_CLAIM': 'custom_fields',
+    'JTI_CLAIM': 'jti',
+    'SLIDING': True,
+}
+
 # Django Authentication settings
 LOGIN_REDIRECT_URL = '/'  # Redirect to home page after login
 LOGOUT_REDIRECT_URL = '/login/'  # Redirect to login page after logout
@@ -185,6 +224,7 @@ if COOKIE_DOMAIN:
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.IsAuthenticated',

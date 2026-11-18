@@ -73,7 +73,7 @@ class NetworkScanner:
             results = self._scan_with_nmap(resolved_ip, scan_type)
             if results:
                 return results
-        except Exception:
+        except Exception as e:
             pass  # Fall back to Python scanner
 
         # Fallback: Python socket scanner
@@ -148,7 +148,7 @@ class NetworkScanner:
             }
         except FileNotFoundError:
             return {}  # nmap not installed
-        except Exception:
+        except Exception as e:
             return {}  # nmap failed, fallback to Python
 
     def _scan_ports_python(self, target: str, ports: List[int], scan_type: str) -> tuple:
@@ -179,7 +179,7 @@ class NetworkScanner:
                             banner = self._grab_banner(target, port)
                             if banner:
                                 service_name = self._parse_banner(banner, port)
-                    except Exception:
+                    except Exception as e:
                         pass
                     
                     services.append({
@@ -190,9 +190,8 @@ class NetworkScanner:
             finally:
                 try:
                     sock.close()
-                except Exception:
+                except Exception as e:
                     pass
-            except Exception:
                 pass
 
         return open_ports, services
@@ -223,7 +222,7 @@ class NetworkScanner:
             banner = sock.recv(1024).decode('utf-8', errors='ignore').strip()
             sock.close()
             return banner
-        except Exception:
+        except Exception as e:
             return ""
 
     def _parse_banner(self, banner: str, port: int) -> str:
@@ -318,7 +317,7 @@ class NetworkScanner:
                     os_info = "Cisco/Network Device (TTL ~255)"
                 elif ttl >= 30:
                     os_info = "Unknown (TTL-based)"
-        except Exception:
+        except Exception as e:
             pass
         
         # Technique 2: Banner-based OS detection
