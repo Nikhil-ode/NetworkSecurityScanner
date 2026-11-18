@@ -9,5 +9,6 @@ urlpatterns = [
     path('users/me/', views_me.me_view, name='me'),
     path('csrf/', views_auth.csrf_cookie, name='csrf_cookie'),
     path('session-login/', views_auth.session_login_view, name='session_login'),
+    path('supabase-login/', views_auth.supabase_login_view, name='supabase_login'),
     path('session-logout/', views_auth.session_logout_view, name='session_logout'),
 ]
